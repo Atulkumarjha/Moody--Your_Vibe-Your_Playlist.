@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const client_id = process.env.SPOTIFY_CLIENT_ID!;
-const redirect_uri = process.env.SPOTIFY_REDIRECT_URL!;
+const redirect_uri = process.env.SPOTIFY_REDIRECT_URI!;
 const scopes = [
     'user-read-private',
     'user-read-email',
