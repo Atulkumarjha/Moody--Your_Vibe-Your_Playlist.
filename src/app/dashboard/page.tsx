@@ -2,21 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import MoodSelector from '@/components/MoodSelector'; 
+import '@/styles/globals.css'; 
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState('');
   const searchParams = useSearchParams();
+  const accessToken = searchParams.get('access_token');
 
   useEffect(() => {
-    const tokenFromQuery = searchParams.get('access_token');
-
-    if (tokenFromQuery) {
-      localStorage.setItem('spotify_access_token', tokenFromQuery);
-    }
-
-    const accessToken = tokenFromQuery || localStorage.getItem('spotify_access_token');
-
     const fetchUserProfile = async () => {
       if (!accessToken) {
         setError('Access token missing');
@@ -43,16 +38,26 @@ export default function Dashboard() {
     };
 
     fetchUserProfile();
-  }, [searchParams]);
+  }, [accessToken]);
+
+  if (!accessToken) return <p className="text-red-500 p-4">Missing access token</p>;
 
   return (
     <main className="p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen">
       {error && <p className="text-red-500">Error: {error}</p>}
       {user ? (
-        <div className="space-y-4">
-          <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
-          <p>Email: {user.email}</p>
-          <img src={user.images?.[0]?.url} alt="Profile" className="w-24 h-24 rounded-full" />
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
+            <p>Email: {user.email}</p>
+            <img src={user.images?.[0]?.url} alt="Profile" className="w-24 h-24 rounded-full" />
+          </div>
+
+          {/* 🧠 Here is where you pass accessToken and onSelect to MoodSelector */}
+          <MoodSelector
+            accessToken={accessToken}
+            onSelect={(mood) => console.log(`Mood selected: ${mood}`)}
+          />
         </div>
       ) : (
         <p>Loading your Spotify profile...</p>
