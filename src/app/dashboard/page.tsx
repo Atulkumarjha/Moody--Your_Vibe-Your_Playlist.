@@ -1,92 +1,113 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import MoodSelector from '../../../components/MoodSelector';
-import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-const moodColors: Record<string, string> = {
-  Happy: 'from-yellow-400 via-pink-400 to-red-500',
-  Sad: 'from-blue-900 via-blue-700 to-gray-800',
-  Chill: 'from-teal-400 via-blue-300 to-indigo-600',
-  Energetic: 'from-orange-400 via-red-500 to-yellow-400',
-  Romantic: 'from-pink-500 via-rose-400 to-purple-600',
+interface MoodSelectorProps {
+  accessToken: string;
+  onSelect: (mood: string) => void;
+}
+
+const moods = ['Happy', 'Sad', 'Chill', 'Energetic', 'Romantic'];
+
+const moodToGenres: Record<string, string[]> = {
+  Happy: ['pop', 'dance', 'happy'],
+  Sad: ['acoustic', 'piano', 'emo'],
+  Chill: ['lo-fi', 'chill', 'ambient'],
+  Energetic: ['rock', 'edm', 'work-out'],
+  Romantic: ['romance', 'rnb', 'soul'],
 };
 
-export default function Dashboard() {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [error, setError] = useState('');
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProps) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    const getToken = async () => {
-      const res = await fetch('/api/token');
-      const { access_token } = await res.json();
-      setAccessToken(access_token);
-    };
+  const generatePlaylist = async (mood: string) => {
+    const genres = moodToGenres[mood] || ['pop'];
 
-    getToken();
-  }, []);
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!accessToken) return;
+      // Get recommendations
+      const recRes = await fetch(
+        `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${genres.join(',')}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      const recData = await recRes.json();
+      const uris = recData.tracks.map((track: any) => track.uri);
 
-      try {
-        const res = await fetch('https://api.spotify.com/v1/me', {
+      // Get user ID
+      const userRes = await fetch('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const userData = await userRes.json();
+
+      // Create playlist
+      const playlistRes = await fetch(
+        `https://api.spotify.com/v1/users/${userData.id}/playlists`,
+        {
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
           },
-        });
-
-        const data = await res.json();
-
-        if (data.error) {
-          setError(data.error.message);
-        } else {
-          setUser(data);
+          body: JSON.stringify({
+            name: `${mood} Mood Playlist`,
+            description: `Mood-based playlist for: ${mood} 🎧`,
+            public: true,
+          }),
         }
-      } catch (err) {
-        setError('Failed to fetch user');
-      }
-    };
+      );
+      const playlistData = await playlistRes.json();
 
-    fetchUserProfile();
-  }, [accessToken]);
+      // Add tracks to playlist
+      await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ uris }),
+        }
+      );
 
-  const gradient = selectedMood
-    ? moodColors[selectedMood]
-    : 'from-black via-gray-900 to-zinc-800';
-
-  if (!accessToken) return <p className="text-red-500 p-4">Missing access token</p>;
+      // Redirect
+      router.push(`/playlist/${playlistData.id}`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate playlist');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`p-8 text-white bg-gradient-to-br ${gradient} min-h-screen`}
-    >
-      {error && <p className="text-red-500">Error: {error}</p>}
-      {user ? (
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
-            <p>Email: {user.email}</p>
-            <img src={user.images?.[0]?.url} alt="Profile" className="w-24 h-24 rounded-full" />
-          </div>
+    <div className="flex flex-wrap gap-4 mt-4">
+      {moods.map((mood) => (
+        <button
+          key={mood}
+          onClick={() => {
+            if (!loading) {
+              onSelect(mood);
+              generatePlaylist(mood);
+            }
+          }}
+          disabled={loading}
+          className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all ${
+            loading
+              ? 'bg-white/10 text-gray-400 cursor-not-allowed'
+              : 'bg-white/20 hover:bg-white/30 text-white'
+          }`}
+        >
+          {mood}
+        </button>
+      ))}
 
-          <MoodSelector
-            accessToken={accessToken}
-            onSelect={(mood) => {
-              console.log(`Mood selected: ${mood}`);
-              setSelectedMood(mood);
-            }}
-          />
-        </div>
-      ) : (
-        <p>Loading your Spotify profile...</p>
-      )}
-    </motion.main>
+      {loading && <p className="text-sm text-gray-300 w-full">Generating playlist...</p>}
+    </div>
   );
 }
