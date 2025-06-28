@@ -1,22 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import MoodSelector from '@/components/MoodSelector'; 
-import '@/styles/globals.css'; 
+import MoodSelector from '../../../components/MoodSelector';
+import { motion } from 'framer-motion';
+
+const moodColors: Record<string, string> = {
+  Happy: 'from-yellow-400 via-pink-400 to-red-500',
+  Sad: 'from-blue-900 via-blue-700 to-gray-800',
+  Chill: 'from-teal-400 via-blue-300 to-indigo-600',
+  Energetic: 'from-orange-400 via-red-500 to-yellow-400',
+  Romantic: 'from-pink-500 via-rose-400 to-purple-600',
+};
 
 export default function Dashboard() {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState('');
-  const searchParams = useSearchParams();
-  const accessToken = searchParams.get('access_token');
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getToken = async () => {
+      const res = await fetch('/api/token');
+      const { access_token } = await res.json();
+      setAccessToken(access_token);
+    };
+
+    getToken();
+  }, []);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!accessToken) {
-        setError('Access token missing');
-        return;
-      }
+      if (!accessToken) return;
 
       try {
         const res = await fetch('https://api.spotify.com/v1/me', {
@@ -40,10 +54,19 @@ export default function Dashboard() {
     fetchUserProfile();
   }, [accessToken]);
 
+  const gradient = selectedMood
+    ? moodColors[selectedMood]
+    : 'from-black via-gray-900 to-zinc-800';
+
   if (!accessToken) return <p className="text-red-500 p-4">Missing access token</p>;
 
   return (
-    <main className="p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen">
+    <motion.main
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className={`p-8 text-white bg-gradient-to-br ${gradient} min-h-screen`}
+    >
       {error && <p className="text-red-500">Error: {error}</p>}
       {user ? (
         <div className="space-y-6">
@@ -53,15 +76,17 @@ export default function Dashboard() {
             <img src={user.images?.[0]?.url} alt="Profile" className="w-24 h-24 rounded-full" />
           </div>
 
-          {/* 🧠 Here is where you pass accessToken and onSelect to MoodSelector */}
           <MoodSelector
             accessToken={accessToken}
-            onSelect={(mood) => console.log(`Mood selected: ${mood}`)}
+            onSelect={(mood) => {
+              console.log(`Mood selected: ${mood}`);
+              setSelectedMood(mood);
+            }}
           />
         </div>
       ) : (
         <p>Loading your Spotify profile...</p>
       )}
-    </main>
+    </motion.main>
   );
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const client_id = process.env.SPOTIFY_CLIENT_ID!;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
@@ -32,11 +33,22 @@ export async function GET(req: NextRequest) {
 
   const { access_token, refresh_token, expires_in } = data;
 
-  const redirectUrl = new URL('https://c5b5-49-36-183-242.ngrok-free.app');
-  redirectUrl.pathname = '/dashboard';
-  redirectUrl.searchParams.set('access_token', access_token);
-  redirectUrl.searchParams.set('refresh_token', refresh_token);
-  redirectUrl.searchParams.set('expires_in', expires_in.toString());
+  const cookieStore = await cookies();
 
-  return NextResponse.redirect(redirectUrl.toString());
+  cookieStore.set('access_token', access_token, {
+    httpOnly: true,
+    path: '/',
+    maxAge: expires_in,
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  cookieStore.set('refresh_token', refresh_token, {
+    httpOnly: true,
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  // ✅ Redirect securely WITHOUT exposing token
+  return NextResponse.redirect(`${req.nextUrl.origin}/dashboard`);
 }

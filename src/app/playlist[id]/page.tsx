@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export default function PlaylistPage() {
   const [playlist, setPlaylist] = useState<any>(null);
@@ -38,7 +39,11 @@ if(error) return <p className='text-red-500 p-8'> Error: {error}</p>;
 if(!playlist) return <p className='p-8 text-white'>Loading Playlist...</p>;
 
 return (
-  <main className='p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen'>
+  <motion.main 
+  initial={{ opacity: 0,y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, ease: 'easeOut' }}
+  className='p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen'>
     <div className='flex items-center space-x-6 mb-8'>
       <img
       src={playlist.images?.[0]?.url}
@@ -79,5 +84,5 @@ return (
             );
           })}
         </div>
-  </main>
-)
+  </motion.main>
+)}
