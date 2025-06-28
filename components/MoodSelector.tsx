@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { moodToGenres } from '../lib/moodToGenres';
 
+const moods = [
+  { label: 'Happy', emoji: '😊' },
+  { label: 'Sad', emoji: '😢' },
+  { label: 'Chill', emoji: '😌' },
+  { label: 'Energetic', emoji: '⚡' },
+  { label: 'Romantic', emoji: '❤️' },
+];
+
 export default function MoodSelector({
   onSelect,
   accessToken
@@ -70,7 +78,8 @@ export default function MoodSelector({
         }
       );
 
-      alert(`Playlist "${playlistData.name}" created successfully!`);
+      // ✅ Redirect to playlist preview page
+      window.location.href = `/playlist/${playlistData.id}?access_token=${accessToken}`;
     } catch (err) {
       console.error(err);
       alert('Failed to generate playlist.');
