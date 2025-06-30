@@ -122,7 +122,7 @@ export default function Dashboard() {
           },
         }
       );
-      const recData = await res.json();
+      const recData = await recRes.json();
       const uris = recData.tracks.map((track: any) => track.uri);
 
       const userRes = await fetch('https://api.spotify.com/v1/me', {
@@ -147,17 +147,32 @@ export default function Dashboard() {
       );
       const playlistData = await playlistRes.json();
 
-      await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
-        {
+      await fetch('/api/save-playlist',{
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ uris }),
+          body: JSON.stringify({ 
+            id: playlistData.id,
+            name: playlistData.name,
+            image: playlistData.images?.[0]?.url,
+            userId: userData.id,
+           }),
         }
       );
+
+      await fetch(
+  `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ uris }),
+  }
+);
+
 
       router.push(`/playlist/${playlistData.id}`);
     } catch (err) {

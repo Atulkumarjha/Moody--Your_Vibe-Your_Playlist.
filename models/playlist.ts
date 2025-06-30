@@ -8,5 +8,5 @@ const PlaylistSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export const playlist = 
+export const Playlist = 
 mongoose.models.Playlist || mongoose.model('Playlist', PlaylistSchema);

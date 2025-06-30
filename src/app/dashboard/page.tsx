@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MoodSelectorProps {
   accessToken: string;
@@ -21,6 +21,8 @@ const moodToGenres: Record<string, string[]> = {
 export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [savedPlaylist, setSavedPlaylist] = useState<any>(null); // Add if you're using saved data
 
   const generatePlaylist = async (mood: string) => {
     const genres = moodToGenres[mood] || ['pop'];
@@ -43,6 +45,7 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const userData = await userRes.json();
+      setUserId(userData.id);
 
       // Create playlist
       const playlistRes = await fetch(
@@ -85,6 +88,16 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
     }
   };
 
+  useEffect(() => {
+    const load = async () => {
+      if (!userId) return;
+      const res = await fetch(`/api/my-playlists?userId=${userId}`);
+      const data = await res.json();
+      setSavedPlaylist(data);
+    };
+    load();
+  }, [userId]);
+
   return (
     <div className="flex flex-wrap gap-4 mt-4">
       {moods.map((mood) => (
@@ -107,10 +120,12 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
         </button>
       ))}
 
-      <button className='mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white'
-      onClick={() => {
-        window.location.href = '/api/auth/logout';
-      }}>
+      <button
+        className="mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+        onClick={() => {
+          window.location.href = '/api/auth/logout';
+        }}
+      >
         Logout
       </button>
 
