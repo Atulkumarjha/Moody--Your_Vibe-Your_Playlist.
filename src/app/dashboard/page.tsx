@@ -107,6 +107,13 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
         </button>
       ))}
 
+      <button className='mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white'
+      onClick={() => {
+        window.location.href = '/api/auth/logout';
+      }}>
+        Logout
+      </button>
+
       {loading && <p className="text-sm text-gray-300 w-full">Generating playlist...</p>}
     </div>
   );
