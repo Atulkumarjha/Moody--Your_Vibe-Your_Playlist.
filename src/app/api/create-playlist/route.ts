@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// Mood → genre seed map (Spotify-approved genres)
 const genreMap: Record<string, string[]> = {
   happy: ['pop', 'dance', 'edm'],
   sad: ['acoustic', 'piano', 'chill'],
@@ -13,43 +12,48 @@ const genreMap: Record<string, string[]> = {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const moodRaw = body.mood;
-  const mood = moodRaw?.toLowerCase(); // ✅ Normalize mood
+  const mood = moodRaw?.toLowerCase();
   console.log('📩 Received mood:', mood);
 
   if (!mood || !genreMap[mood]) {
-    return NextResponse.json({ error: 'Invalid mood' }, { status: 400 });
+    console.error('❌ Invalid mood:', mood);
+    return NextResponse.json({ error: 'Invalid mood: ' + mood }, { status: 400 });
   }
 
-  const cookieStore = cookies();
-  const access_token = cookieStore.get('access_token')?.value;
-
+  const access_token = cookies().get('access_token')?.value;
   if (!access_token) {
+    console.error('❌ Missing access token');
     return NextResponse.json({ error: 'Access token missing' }, { status: 401 });
   }
 
-  // 1. Get user profile
+  // 1. User profile
   const userRes = await fetch('https://api.spotify.com/v1/me', {
     headers: { Authorization: `Bearer ${access_token}` },
   });
-
   const user = await userRes.json();
-  if (!user.id) {
-    return NextResponse.json({ error: 'Failed to get user ID' }, { status: 500 });
+  console.log('👤 User fetch status:', userRes.status, user.id);
+  if (userRes.status !== 200 || !user.id) {
+    console.error('❌ User fetch failed:', user);
+    return NextResponse.json({ error: 'User fetch failed: ' + JSON.stringify(user) }, { status: 500 });
   }
 
-  // 2. Get recommendations
+  // 2. Recommendations
   const seedGenres = genreMap[mood];
   const recRes = await fetch(
     `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres.join(',')}`,
-    {
-      headers: { Authorization: `Bearer ${access_token}` },
-    }
+    { headers: { Authorization: `Bearer ${access_token}` } }
   );
   const recData = await recRes.json();
-  const trackURIs = recData.tracks?.map((track: any) => track.uri) || [];
+  console.log('🎧 Recommendations status:', recRes.status, recData.tracks?.length);
+  if (recRes.status !== 200 || !recData.tracks) {
+    console.error('❌ Recommendations fetch failed:', recData);
+    return NextResponse.json({ error: 'Recommendations failed: ' + JSON.stringify(recData) }, { status: 500 });
+  }
 
+  const trackURIs = recData.tracks.map((t: any) => t.uri);
   if (trackURIs.length === 0) {
-    return NextResponse.json({ error: 'No tracks found' }, { status: 500 });
+    console.error('❌ No tracks returned');
+    return NextResponse.json({ error: 'No tracks returned' }, { status: 500 });
   }
 
   // 3. Create playlist
@@ -63,26 +67,35 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         name: `${mood.charAt(0).toUpperCase() + mood.slice(1)} Vibes Playlist`,
-        description: `A mood-based playlist for ${mood}`,
-        public: false,
+        description: `Generated for mood: ${mood}`,
       }),
     }
   );
-
-  const playlist = await playlistRes.json();
-  if (!playlist.id) {
-    return NextResponse.json({ error: 'Failed to create playlist' }, { status: 500 });
+  const playlistData = await playlistRes.json();
+  console.log('📚 Playlist creation status:', playlistRes.status, playlistData);
+  if (playlistRes.status !== 201 || !playlistData.id) {
+    console.error('❌ Playlist creation failed', playlistData);
+    return NextResponse.json({ error: 'Playlist creation failed: ' + JSON.stringify(playlistData) }, { status: 500 });
   }
 
   // 4. Add tracks
-  await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ uris: trackURIs }),
-  });
+  const addRes = await fetch(
+    `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uris: trackURIs }),
+    }
+  );
+  const addData = await addRes.json();
+  console.log('➕ Add tracks status:', addRes.status, addData);
+  if (addRes.status !== 201 && addRes.status !== 200) {
+    console.error('❌ Failed to add tracks', addData);
+    return NextResponse.json({ error: 'Add tracks failed: ' + JSON.stringify(addData) }, { status: 500 });
+  }
 
-  return NextResponse.json({ playlistId: playlist.id });
+  return NextResponse.json({ playlistId: playlistData.id });
 }
