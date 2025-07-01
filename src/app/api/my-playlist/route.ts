@@ -1,4 +1,4 @@
-import { NextRequest, nextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB }  from '../../../../lib/db';
 import { Playlist } from '../../../../models/playlist';
 
@@ -7,10 +7,9 @@ export async function GET(req: NextRequest) {
     
     try{
         await connectDB();
-        const data = (await Playlist.find({ userId })).toSorted({ createdAt: -1 });
+        const data = await Playlist.find({ userId }).sort({ createdAt: -1 });
         return NextResponse.json(data);      
-    }catch (err) {
-        return NextResponse.json({ error: 'DB read failed' }, { status: 500 }
-        );
+    } catch {
+        return NextResponse.json({ error: 'DB read failed' }, { status: 500 });
     }
 }

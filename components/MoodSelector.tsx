@@ -3,11 +3,23 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export interface MoodSelectorProps {
   accessToken: string | null;
   onSelect: (mood: string) => void;
   loading: boolean;
+}
+
+interface SpotifyUser {
+  display_name: string;
+  email: string;
+  id: string;
+  images?: Array<{ url: string }>;
+}
+
+interface SpotifyTrack {
+  uri: string;
 }
 
 // Define MoodSelector component
@@ -44,7 +56,7 @@ const moodColors: Record<string, string> = {
 
 export default function Dashboard() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SpotifyUser | null>(null);
   const [error, setError] = useState('');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -89,7 +101,7 @@ export default function Dashboard() {
         } else {
           setUser(data);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to fetch user');
       }
     };
@@ -123,7 +135,7 @@ export default function Dashboard() {
         }
       );
       const recData = await recRes.json();
-      const uris = recData.tracks.map((track: any) => track.uri);
+      const uris = recData.tracks.map((track: SpotifyTrack) => track.uri);
 
       const userRes = await fetch('https://api.spotify.com/v1/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -202,7 +214,19 @@ export default function Dashboard() {
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
             <p>Email: {user.email}</p>
-            <img src={user.images?.[0]?.url} alt="Profile" className="w-24 h-24 rounded-full" />
+            {user.images?.[0]?.url ? (
+              <Image 
+                src={user.images[0].url} 
+                alt="Profile" 
+                width={96}
+                height={96}
+                className="rounded-full" 
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center">
+                <span className="text-gray-400">No Image</span>
+              </div>
+            )}
           </div>
 
           <MoodSelector

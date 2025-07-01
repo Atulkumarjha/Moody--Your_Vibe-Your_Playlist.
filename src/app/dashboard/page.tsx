@@ -2,10 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
-interface MoodSelectorProps {
-  accessToken: string;
-  onSelect: (mood: string) => void;
+interface SpotifyUser {
+  display_name: string;
+  email: string;
+  images?: Array<{ url: string }>;
 }
 
 const moods = ['Happy', 'Sad', 'Chill', 'Energetic', 'Romantic'];
@@ -18,13 +20,63 @@ const moodToGenres: Record<string, string[]> = {
   Romantic: ['romance', 'rnb', 'soul'],
 };
 
-export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProps) {
+export default function Dashboard() {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<SpotifyUser | null>(null);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [savedPlaylist, setSavedPlaylist] = useState<any>(null); // Add if you're using saved data
+
+  // Fetch access token from cookie
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const res = await fetch('/api/token');
+        const { access_token } = await res.json();
+
+        if (!access_token) {
+          setError('Access token missing');
+        } else {
+          setAccessToken(access_token);
+        }
+      } catch {
+        setError('Failed to retrieve access token');
+      }
+    };
+
+    getToken();
+  }, []);
+
+  // Fetch user profile
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!accessToken) return;
+
+      try {
+        const res = await fetch('https://api.spotify.com/v1/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          setError(data.error.message);
+        } else {
+          setUser(data);
+        }
+      } catch {
+        setError('Failed to fetch user');
+      }
+    };
+
+    fetchUserProfile();
+  }, [accessToken]);
 
   const generatePlaylist = async (mood: string) => {
+    if (!accessToken) return;
+    
     const genres = moodToGenres[mood] || ['pop'];
 
     try {
@@ -38,14 +90,13 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
         }
       );
       const recData = await recRes.json();
-      const uris = recData.tracks.map((track: any) => track.uri);
+      const uris = recData.tracks.map((track: { uri: string }) => track.uri);
 
       // Get user ID
       const userRes = await fetch('https://api.spotify.com/v1/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const userData = await userRes.json();
-      setUserId(userData.id);
 
       // Create playlist
       const playlistRes = await fetch(
@@ -88,48 +139,62 @@ export default function MoodSelector({ accessToken, onSelect }: MoodSelectorProp
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
-      if (!userId) return;
-      const res = await fetch(`/api/my-playlists?userId=${userId}`);
-      const data = await res.json();
-      setSavedPlaylist(data);
-    };
-    load();
-  }, [userId]);
-
   return (
-    <div className="flex flex-wrap gap-4 mt-4">
-      {moods.map((mood) => (
-        <button
-          key={mood}
-          onClick={() => {
-            if (!loading) {
-              onSelect(mood);
-              generatePlaylist(mood);
-            }
-          }}
-          disabled={loading}
-          className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all ${
-            loading
-              ? 'bg-white/10 text-gray-400 cursor-not-allowed'
-              : 'bg-white/20 hover:bg-white/30 text-white'
-          }`}
-        >
-          {mood}
-        </button>
-      ))}
+    <div className="p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen">
+      {error && <p className="text-red-500">Error: {error}</p>}
+      {!accessToken && <p className="text-red-500">Missing access token</p>}
 
-      <button
-        className="mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
-        onClick={() => {
-          window.location.href = '/api/auth/logout';
-        }}
-      >
-        Logout
-      </button>
+      {user ? (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
+            <p>Email: {user.email}</p>
+            {user.images?.[0]?.url && (
+              <Image 
+                src={user.images[0].url} 
+                alt="Profile" 
+                width={96}
+                height={96}
+                className="rounded-full" 
+              />
+            )}
+          </div>
 
-      {loading && <p className="text-sm text-gray-300 w-full">Generating playlist...</p>}
+          <div className="flex flex-wrap gap-4 mt-4">
+            {moods.map((mood) => (
+              <button
+                key={mood}
+                onClick={() => {
+                  if (!loading) {
+                    generatePlaylist(mood);
+                  }
+                }}
+                disabled={loading}
+                className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all ${
+                  loading
+                    ? 'bg-white/10 text-gray-400 cursor-not-allowed'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                }`}
+              >
+                {mood}
+              </button>
+            ))}
+
+            <button
+              className="mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => {
+                window.location.href = '/api/auth/logout';
+              }}
+            >
+              Logout
+            </button>
+
+            {loading && <p className="text-sm text-gray-300 w-full">Generating playlist...</p>}
+          </div>
+        </div>
+      ) : (
+        <p>Loading your Spotify profile...</p>
+      )}
     </div>
   );
 }
