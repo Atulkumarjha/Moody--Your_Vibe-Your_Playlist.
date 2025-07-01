@@ -12,14 +12,6 @@ interface SpotifyUser {
 
 const moods = ['Happy', 'Sad', 'Chill', 'Energetic', 'Romantic'];
 
-const moodToGenres: Record<string, string[]> = {
-  Happy: ['pop', 'dance', 'happy'],
-  Sad: ['acoustic', 'piano', 'emo'],
-  Chill: ['lo-fi', 'chill', 'ambient'],
-  Energetic: ['rock', 'edm', 'work-out'],
-  Romantic: ['romance', 'rnb', 'soul'],
-};
-
 export default function Dashboard() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<SpotifyUser | null>(null);
@@ -27,7 +19,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Fetch access token from cookie
+  // ✅ Fetch access token from cookie
   useEffect(() => {
     const getToken = async () => {
       try {
@@ -47,7 +39,7 @@ export default function Dashboard() {
     getToken();
   }, []);
 
-  // Fetch user profile
+  // ✅ Fetch Spotify user profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!accessToken) return;
@@ -74,66 +66,29 @@ export default function Dashboard() {
     fetchUserProfile();
   }, [accessToken]);
 
+  // ✅ Generate playlist via server API
   const generatePlaylist = async (mood: string) => {
-    if (!accessToken) return;
-    
-    const genres = moodToGenres[mood] || ['pop'];
-
     try {
       setLoading(true);
+      setError('');
 
-      // Get recommendations
-      const recRes = await fetch(
-        `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${genres.join(',')}`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
-      const recData = await recRes.json();
-      const uris = recData.tracks.map((track: { uri: string }) => track.uri);
-
-      // Get user ID
-      const userRes = await fetch('https://api.spotify.com/v1/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const res = await fetch('/api/create-playlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood }),
       });
-      const userData = await userRes.json();
 
-      // Create playlist
-      const playlistRes = await fetch(
-        `https://api.spotify.com/v1/users/${userData.id}/playlists`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: `${mood} Mood Playlist`,
-            description: `Mood-based playlist for: ${mood} 🎧`,
-            public: true,
-          }),
-        }
-      );
-      const playlistData = await playlistRes.json();
+      const data = await res.json();
+      console.log('🎵 Playlist API Response:', data);
 
-      // Add tracks to playlist
-      await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ uris }),
-        }
-      );
-
-      // Redirect
-      router.push(`/playlist/${playlistData.id}`);
+      if (res.ok && data.playlistId) {
+        router.push(`/playlist/${data.playlistId}`);
+      } else {
+        alert(`❌ Failed: ${data.error || 'Unknown error'}`);
+      }
     } catch (err) {
-      console.error(err);
-      alert('Failed to generate playlist');
+      console.error('❌ Playlist generation failed:', err);
+      alert('Something went wrong while generating your playlist.');
     } finally {
       setLoading(false);
     }
@@ -165,9 +120,7 @@ export default function Dashboard() {
               <button
                 key={mood}
                 onClick={() => {
-                  if (!loading) {
-                    generatePlaylist(mood);
-                  }
+                  if (!loading) generatePlaylist(mood);
                 }}
                 disabled={loading}
                 className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all ${

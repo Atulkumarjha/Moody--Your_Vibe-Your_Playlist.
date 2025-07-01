@@ -14,6 +14,7 @@ const genreMap: Record<string, string[]> = {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const mood = body.mood;
+  console.log('Received mood:', mood)
 
   if (!mood || !genreMap[mood]) {
     return NextResponse.json({ error: 'Invalid mood' }, { status: 400 });
