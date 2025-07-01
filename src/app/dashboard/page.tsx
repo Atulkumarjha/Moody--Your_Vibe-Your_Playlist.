@@ -92,7 +92,7 @@ export default function Dashboard() {
 
     // ✅ Redirect to playlist page
     router.push(`/playlist/${data.playlistId}`);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('❌ Exception:', err);
     alert('Something went wrong while generating playlist.');
   } finally {

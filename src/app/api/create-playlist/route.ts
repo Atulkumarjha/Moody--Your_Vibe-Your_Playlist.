@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+interface SpotifyTrack {
+  uri: string;
+  id: string;
+  name: string;
+  artists: Array<{ name: string }>;
+}
+
+interface SpotifyRecommendationsResponse {
+  tracks: SpotifyTrack[];
+}
+
 const genreMap: Record<string, string[]> = {
   happy: ['pop', 'dance', 'edm'],
   sad: ['acoustic', 'piano', 'chill'],
@@ -20,7 +31,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid mood: ' + mood }, { status: 400 });
   }
 
-  const access_token = cookies().get('access_token')?.value;
+  const cookieStore = await cookies();
+  const access_token = cookieStore.get('access_token')?.value;
   if (!access_token) {
     console.error('❌ Missing access token');
     return NextResponse.json({ error: 'Access token missing' }, { status: 401 });
@@ -43,14 +55,14 @@ export async function POST(req: NextRequest) {
     `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres.join(',')}`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   );
-  const recData = await recRes.json();
+  const recData: SpotifyRecommendationsResponse = await recRes.json();
   console.log('🎧 Recommendations status:', recRes.status, recData.tracks?.length);
   if (recRes.status !== 200 || !recData.tracks) {
     console.error('❌ Recommendations fetch failed:', recData);
     return NextResponse.json({ error: 'Recommendations failed: ' + JSON.stringify(recData) }, { status: 500 });
   }
 
-  const trackURIs = recData.tracks.map((t: any) => t.uri);
+  const trackURIs = recData.tracks?.map((track: { uri: string }) => track.uri) || [];
   if (trackURIs.length === 0) {
     console.error('❌ No tracks returned');
     return NextResponse.json({ error: 'No tracks returned' }, { status: 500 });
