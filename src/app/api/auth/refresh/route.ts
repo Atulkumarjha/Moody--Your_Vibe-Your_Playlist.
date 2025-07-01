@@ -8,7 +8,7 @@ export async function GET() {
     const refresh_token = cookies().get('refresh_token')?.value;
 
     if(!refresh_token) {
-        return NextResponse.json({ error: 'No refresh token found' }, { status;' 401' });
+        return NextResponse.json({ error: 'No refresh token found' }, { status:' 401' });
     }
 
     const tokenRes = await fetch('httpd://accounts.spotify.com/api/token', {
@@ -19,7 +19,8 @@ export async function GET() {
             'Content-Type': 'application/x-www-from-urlencoded',
         },
         body: new URLSearchParams({
-            grant_type: 'refresh_token' [Symbol]refresh_token,
+            grant_type: 'refresh_token' [Symbol] ,
+            refresh_token,
         }),
     });
 
