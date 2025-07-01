@@ -68,31 +68,37 @@ export default function Dashboard() {
 
   // ✅ Generate playlist via server API
   const generatePlaylist = async (mood: string) => {
-    try {
-      setLoading(true);
-      setError('');
+  if (!accessToken) return;
 
-      const res = await fetch('/api/create-playlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood }),
-      });
+  try {
+    setLoading(true);
+    console.log('🎯 Sending request with mood:', mood);
 
-      const data = await res.json();
-      console.log('🎵 Playlist API Response:', data);
+    const res = await fetch('/api/create-playlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ mood: mood.toLowerCase() }), // 👈 lowercase to match server keys
+    });
 
-      if (res.ok && data.playlistId) {
-        router.push(`/playlist/${data.playlistId}`);
-      } else {
-        alert(`❌ Failed: ${data.error || 'Unknown error'}`);
-      }
-    } catch (err) {
-      console.error('❌ Playlist generation failed:', err);
-      alert('Something went wrong while generating your playlist.');
-    } finally {
-      setLoading(false);
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error('❌ Error response:', data);
+      alert(`Failed to generate playlist: ${data.error || 'Unknown error'}`);
+      return;
     }
-  };
+
+    // ✅ Redirect to playlist page
+    router.push(`/playlist/${data.playlistId}`);
+  } catch (err: any) {
+    console.error('❌ Exception:', err);
+    alert('Something went wrong while generating playlist.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen">
