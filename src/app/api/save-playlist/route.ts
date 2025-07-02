@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '../../../../lib/db';
 import { Playlist } from '../../../../models/playlist';
 
+interface SavePlaylistRequest {
+  id: string;
+  name: string;
+  image: string;
+  userId: string;
+}
+
 export async function POST(req: NextRequest) {
-    const {  id, name, image, userId } = await req.json();
+    const {  id, name, image, userId }: SavePlaylistRequest = await req.json();
 
     try {
         await connectDB();

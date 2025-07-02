@@ -12,6 +12,24 @@ interface SpotifyRecommendationsResponse {
   tracks: SpotifyTrack[];
 }
 
+interface CreatePlaylistRequest {
+  mood: string;
+}
+
+interface SpotifyUser {
+  id: string;
+  display_name: string;
+}
+
+interface SpotifyPlaylist {
+  id: string;
+  name: string;
+}
+
+interface SpotifyAddTracksResponse {
+  snapshot_id: string;
+}
+
 const genreMap: Record<string, string[]> = {
   happy: ['pop', 'dance', 'edm'],
   sad: ['acoustic', 'piano', 'chill'],
@@ -21,7 +39,7 @@ const genreMap: Record<string, string[]> = {
 };
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const body: CreatePlaylistRequest = await req.json();
   const moodRaw = body.mood;
   const mood = moodRaw?.toLowerCase();
   console.log('📩 Received mood:', mood);
@@ -42,7 +60,7 @@ export async function POST(req: NextRequest) {
   const userRes = await fetch('https://api.spotify.com/v1/me', {
     headers: { Authorization: `Bearer ${access_token}` },
   });
-  const user = await userRes.json();
+  const user: SpotifyUser = await userRes.json();
   console.log('👤 User fetch status:', userRes.status, user.id);
   if (userRes.status !== 200 || !user.id) {
     console.error('❌ User fetch failed:', user);
@@ -62,7 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Recommendations failed: ' + JSON.stringify(recData) }, { status: 500 });
   }
 
-  const trackURIs = recData.tracks?.map((track: { uri: string }) => track.uri) || [];
+  const trackURIs = recData.tracks?.map((track: SpotifyTrack) => track.uri) || [];
   if (trackURIs.length === 0) {
     console.error('❌ No tracks returned');
     return NextResponse.json({ error: 'No tracks returned' }, { status: 500 });
@@ -83,7 +101,7 @@ export async function POST(req: NextRequest) {
       }),
     }
   );
-  const playlistData = await playlistRes.json();
+  const playlistData: SpotifyPlaylist = await playlistRes.json();
   console.log('📚 Playlist creation status:', playlistRes.status, playlistData);
   if (playlistRes.status !== 201 || !playlistData.id) {
     console.error('❌ Playlist creation failed', playlistData);
@@ -102,7 +120,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ uris: trackURIs }),
     }
   );
-  const addData = await addRes.json();
+  const addData: SpotifyAddTracksResponse = await addRes.json();
   console.log('➕ Add tracks status:', addRes.status, addData);
   if (addRes.status !== 201 && addRes.status !== 200) {
     console.error('❌ Failed to add tracks', addData);
