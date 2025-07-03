@@ -67,7 +67,10 @@ export default function Dashboard() {
 
   // ✅ Generate playlist via server API
   const generatePlaylist = async (mood: string) => {
-    if (!accessToken) return;
+    if (!accessToken) {
+      alert('Please log in first');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -82,6 +85,8 @@ export default function Dashboard() {
       });
 
       const data = await res.json();
+      console.log('📊 Response status:', res.status);
+      console.log('📊 Response data:', data);
 
       if (!res.ok) {
         console.error('❌ Error response:', data);
@@ -89,11 +94,18 @@ export default function Dashboard() {
         return;
       }
 
+      if (!data.playlistId) {
+        console.error('❌ No playlist ID in response:', data);
+        alert('Failed to generate playlist: No playlist ID returned');
+        return;
+      }
+
+      console.log('✅ Playlist created successfully:', data.playlistId);
       // ✅ Redirect to playlist page
       router.push(`/playlist/${data.playlistId}`);
     } catch (err: unknown) {
       console.error('❌ Exception:', err);
-      alert('Something went wrong while generating playlist.');
+      alert('Something went wrong while generating playlist: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
