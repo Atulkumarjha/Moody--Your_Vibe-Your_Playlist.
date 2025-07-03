@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Playlist Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #121212; color: white; }
+        .success { color: #1db954; background: rgba(29, 185, 84, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .error { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0; }
+        button { background: #1db954; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #1ed760; }
+        .mood-button { background: #6366f1; }
+        .mood-button:hover { background: #7c3aed; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Simple Playlist Generation Test</h1>
+    
+    <div>
+        <h3>Step 1: Login to Spotify</h3>
+        <button onclick="login()">Login with Spotify</button>
+        <div id="login-status"></div>
+    </div>
+
+    <div>
+        <h3>Step 2: Test Simple Playlist Creation</h3>
+        <button class="mood-button" onclick="testMood('happy')">Test Happy Playlist</button>
+        <button class="mood-button" onclick="testMood('sad')">Test Sad Playlist</button>
+        <button class="mood-button" onclick="testMood('energetic')">Test Energetic Playlist</button>
+        <button class="mood-button" onclick="testMood('chill')">Test Chill Playlist</button>
+        <button class="mood-button" onclick="testMood('romantic')">Test Romantic Playlist</button>
+        <div id="playlist-status"></div>
+    </div>
+
+    <script>
+        function login() {
+            document.getElementById('login-status').innerHTML = '<p>Redirecting to Spotify...</p>';
+            window.location.href = '/api/auth';
+        }
+
+        async function testMood(mood) {
+            const statusDiv = document.getElementById('playlist-status');
+            statusDiv.innerHTML = `<p>Creating ${mood} playlist...</p>`;
+
+            try {
+                // Check if logged in
+                const tokenRes = await fetch('/api/token');
+                const tokenData = await tokenRes.json();
+                
+                if (!tokenData.access_token) {
+                    statusDiv.innerHTML = '<div class="error">❌ Please login first!</div>';
+                    return;
+                }
+
+                // Create playlist
+                const playlistRes = await fetch('/api/create-playlist-simple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mood })
+                });
+
+                const playlistData = await playlistRes.json();
+
+                if (playlistRes.ok && playlistData.playlistId) {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            ✅ ${mood} playlist created successfully! 
+                            <br>Playlist ID: ${playlistData.playlistId}
+                            <br><a href="https://open.spotify.com/playlist/${playlistData.playlistId}" target="_blank" style="color: #1db954;">Open in Spotify</a>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ Failed to create playlist: ${playlistData.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Check login status on page load
+        fetch('/api/token')
+            .then(r => r.json())
+            .then(data => {
+                if (data.access_token) {
+                    document.getElementById('login-status').innerHTML = 
+                        '<div class="success">✅ Already logged in to Spotify!</div>';
+                }
+            })
+            .catch(() => {});
+    </script>
+</body>
+</html>

@@ -76,7 +76,7 @@ export default function Dashboard() {
       setLoading(true);
       console.log('🎯 Sending request with mood:', mood);
 
-      const res = await fetch('/api/create-playlist', {
+      const res = await fetch('/api/create-playlist-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export default function Dashboard() {
 
       if (!res.ok) {
         console.error('❌ Error response:', data);
-        alert(`Failed to generate playlist: ${data.error || 'Unknown error'}`);
+        alert(`Failed to generate playlist using search method: ${data.error || 'Unknown error'}`);
         return;
       }
 
