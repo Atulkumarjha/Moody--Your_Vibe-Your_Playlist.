@@ -1,11 +1,11 @@
 // This file contains the mood to genre mapping for Spotify recommendations
-// These are validated Spotify genre seeds
+// Using only basic, guaranteed Spotify genres
 export const moodToGenres = {
-  happy: ['pop', 'dance', 'funk', 'disco', 'happy'],
-  sad: ['acoustic', 'piano', 'chill', 'indie', 'ambient'],
-  energetic: ['work-out', 'rock', 'techno', 'electronic', 'punk'],
-  chill: ['chill', 'ambient', 'downtempo', 'study', 'sleep'],
-  romantic: ['romance', 'r-n-b', 'soul', 'jazz', 'bossanova'],
+  happy: ['pop', 'dance'],
+  sad: ['acoustic', 'jazz'],
+  energetic: ['rock', 'electronic'],
+  chill: ['jazz', 'classical'],
+  romantic: ['soul', 'blues'],
 } as const;
 
 export type MoodType = keyof typeof moodToGenres;

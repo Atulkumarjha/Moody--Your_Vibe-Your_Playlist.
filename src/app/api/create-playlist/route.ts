@@ -76,10 +76,29 @@ export async function POST(req: NextRequest) {
     const seedGenres = genreMap[mood as keyof typeof genreMap];
     console.log('🎵 Using genres:', seedGenres);
     
-    const recRes = await fetch(
+    // Try with all genres first
+    let recRes = await fetch(
       `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres.join(',')}`,
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
+    
+    // If that fails, try with fewer genres
+    if (!recRes.ok && seedGenres.length > 2) {
+      console.log('⚠️ Trying with fewer genres...');
+      recRes = await fetch(
+        `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres.slice(0, 2).join(',')}`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+    }
+    
+    // If still failing, try with just one genre
+    if (!recRes.ok) {
+      console.log('⚠️ Trying with single genre...');
+      recRes = await fetch(
+        `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres[0]}`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+    }
     
     if (!recRes.ok) {
       console.error('❌ Recommendations fetch failed with status:', recRes.status);

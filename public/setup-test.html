@@ -47,7 +47,8 @@
         <div class="step">
             <h2>Step 4: Test Playlist Generation</h2>
             <p>After successful login, test playlist generation:</p>
-            <button onclick="testPlaylist()">Test Playlist Generation</button>
+            <button onclick="testPlaylist()">Test Playlist Generation (Recommendations)</button>
+            <button onclick="testSimplePlaylist()" style="margin-left: 10px; background: #f39c12;">Test Simple Playlist (Search-based)</button>
             <div id="playlist-result"></div>
         </div>
     </div>
@@ -92,6 +93,37 @@
                 .then(data => {
                     if (data.playlistId) {
                         result.innerHTML = `<div class="success">✅ Playlist created! ID: ${data.playlistId}</div>`;
+                    } else {
+                        result.innerHTML = `<div class="error">❌ Error: ${data.error || 'Unknown error'}</div>`;
+                    }
+                })
+                .catch(err => {
+                    result.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+                });
+        }
+
+        function testSimplePlaylist() {
+            const result = document.getElementById('playlist-result');
+            result.innerHTML = '<p>Testing simple playlist generation...</p>';
+            
+            fetch('/api/token')
+                .then(r => r.json())
+                .then(tokenData => {
+                    if (!tokenData.access_token) {
+                        result.innerHTML = '<div class="error">❌ Please login first</div>';
+                        return;
+                    }
+                    
+                    return fetch('/api/create-playlist-simple', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mood: 'happy' })
+                    });
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.playlistId) {
+                        result.innerHTML = `<div class="success">✅ Simple playlist created! ID: ${data.playlistId}</div>`;
                     } else {
                         result.innerHTML = `<div class="error">❌ Error: ${data.error || 'Unknown error'}</div>`;
                     }
