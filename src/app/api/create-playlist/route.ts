@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { moodToGenres, MoodType } from '../../../../lib/moodToGenres';
+import { moodToGenres } from '../../../../lib/moodToGenres';
 
 interface SpotifyTrack {
   uri: string;
