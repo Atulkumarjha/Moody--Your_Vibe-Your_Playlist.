@@ -3,14 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import MoodSelector from '../../../components/MoodSelector';
 
 interface SpotifyUser {
   display_name: string;
   email: string;
   images?: Array<{ url: string }>;
 }
-
-const moods = ['Happy', 'Sad', 'Chill', 'Energetic', 'Romantic'];
 
 export default function Dashboard() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -68,92 +67,113 @@ export default function Dashboard() {
 
   // ✅ Generate playlist via server API
   const generatePlaylist = async (mood: string) => {
-  if (!accessToken) return;
+    if (!accessToken) return;
 
-  try {
-    setLoading(true);
-    console.log('🎯 Sending request with mood:', mood);
+    try {
+      setLoading(true);
+      console.log('🎯 Sending request with mood:', mood);
 
-    const res = await fetch('/api/create-playlist', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ mood: mood.toLowerCase() }), // 👈 lowercase to match server keys
-    });
+      const res = await fetch('/api/create-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mood: mood.toLowerCase() }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      console.error('❌ Error response:', data);
-      alert(`Failed to generate playlist: ${data.error || 'Unknown error'}`);
-      return;
+      if (!res.ok) {
+        console.error('❌ Error response:', data);
+        alert(`Failed to generate playlist: ${data.error || 'Unknown error'}`);
+        return;
+      }
+
+      // ✅ Redirect to playlist page
+      router.push(`/playlist/${data.playlistId}`);
+    } catch (err: unknown) {
+      console.error('❌ Exception:', err);
+      alert('Something went wrong while generating playlist.');
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Redirect to playlist page
-    router.push(`/playlist/${data.playlistId}`);
-  } catch (err: unknown) {
-    console.error('❌ Exception:', err);
-    alert('Something went wrong while generating playlist.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
-    <div className="p-8 text-white bg-gradient-to-br from-black via-gray-900 to-zinc-800 min-h-screen">
-      {error && <p className="text-red-500">Error: {error}</p>}
-      {!accessToken && <p className="text-red-500">Missing access token</p>}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-8 text-white">
+      <div className="max-w-4xl mx-auto">
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6">
+            <p className="text-red-200">Error: {error}</p>
+          </div>
+        )}
 
-      {user ? (
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">Welcome, {user.display_name} 👋</h1>
-            <p>Email: {user.email}</p>
-            {user.images?.[0]?.url && (
-              <Image 
-                src={user.images[0].url} 
-                alt="Profile" 
-                width={96}
-                height={96}
-                className="rounded-full" 
+        {!accessToken && (
+          <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4 mb-6">
+            <p className="text-yellow-200">Missing access token. Please log in again.</p>
+          </div>
+        )}
+
+        {user ? (
+          <div className="space-y-8">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-6">
+                {user.images?.[0]?.url && (
+                  <Image
+                    src={user.images[0].url}
+                    alt="Profile"
+                    width={96}
+                    height={96}
+                    className="rounded-full border-4 border-white/20"
+                  />
+                )}
+              </div>
+              <h1 className="text-4xl font-bold mb-2">
+                Welcome, {user.display_name}! 👋
+              </h1>
+              <p className="text-xl text-gray-300 mb-8">
+                How are you feeling today? Let&apos;s create the perfect playlist for your mood.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-center">Choose Your Mood</h2>
+              <MoodSelector
+                onSelect={generatePlaylist}
+                loading={loading}
+                disabled={!accessToken}
               />
-            )}
-          </div>
+              
+              {loading && (
+                <div className="text-center">
+                  <div className="inline-flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-white rounded-full animate-bounce" />
+                    <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                    <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  </div>
+                  <p className="mt-2 text-gray-300">Creating your perfect playlist...</p>
+                </div>
+              )}
+            </div>
 
-          <div className="flex flex-wrap gap-4 mt-4">
-            {moods.map((mood) => (
+            <div className="text-center pt-8">
               <button
-                key={mood}
                 onClick={() => {
-                  if (!loading) generatePlaylist(mood);
+                  window.location.href = '/api/auth/logout';
                 }}
-                disabled={loading}
-                className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all ${
-                  loading
-                    ? 'bg-white/10 text-gray-400 cursor-not-allowed'
-                    : 'bg-white/20 hover:bg-white/30 text-white'
-                }`}
+                className="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-lg font-semibold transition-colors"
               >
-                {mood}
+                Logout
               </button>
-            ))}
-
-            <button
-              className="mt-6 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
-              onClick={() => {
-                window.location.href = '/api/auth/logout';
-              }}
-            >
-              Logout
-            </button>
-
-            {loading && <p className="text-sm text-gray-300 w-full">Generating playlist...</p>}
+            </div>
           </div>
-        </div>
-      ) : (
-        <p>Loading your Spotify profile...</p>
-      )}
+        ) : (
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-gray-300">Loading your Spotify profile...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

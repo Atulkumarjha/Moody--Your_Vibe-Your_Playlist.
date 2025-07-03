@@ -41,14 +41,26 @@ interface SpotifyPlaylist {
   };
 }
 
-export default function PlaylistPage({ params }: { params: { id: string } }) {
+export default function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
   const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [playlistId, setPlaylistId] = useState<string | null>(null);
   const router = useRouter();
 
+  // Resolve params asynchronously
   useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setPlaylistId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!playlistId) return;
+
     const getTokenAndPlaylist = async () => {
       try {
         // Get access token
@@ -65,7 +77,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
 
         // Fetch playlist details
         const playlistRes = await fetch(
-          `https://api.spotify.com/v1/playlists/${params.id}?fields=id,name,description,external_urls,images,tracks(total,items(track(id,name,artists(name),album(name,images),external_urls,preview_url)))`,
+          `https://api.spotify.com/v1/playlists/${playlistId}?fields=id,name,description,external_urls,images,tracks(total,items(track(id,name,artists(name),album(name,images),external_urls,preview_url)))`,
           {
             headers: {
               Authorization: `Bearer ${access_token}`,
@@ -88,7 +100,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
     };
 
     getTokenAndPlaylist();
-  }, [params.id, router]);
+  }, [playlistId, router]);
 
   const savePlaylist = async () => {
     if (!playlist || !accessToken) return;

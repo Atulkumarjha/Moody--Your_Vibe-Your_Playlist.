@@ -1,29 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '../../../../lib/db';
-import { Playlist } from '../../../../models/playlist';
-
-interface SavePlaylistRequest {
-  id: string;
-  name: string;
-  image: string;
-  userId: string;
-}
+import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
-    const {  id, name, image, userId }: SavePlaylistRequest = await req.json();
+  const cookieStore = await cookies();
+  const access_token = cookieStore.get('access_token')?.value;
 
-    try {
-        await connectDB();
-        await Playlist.create({
-            spotifyId: id,
-            name,
-            image,
-            userId,
-        });
+  if (!access_token) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
 
-        return NextResponse.json({ success: true });
-    }catch (err) {
-        console.error('DB error;', err);
-        return NextResponse.json({ error: 'faileed to save'}, { status: 500 });
-    }
+  try {
+    const { playlistId, name, description } = await req.json();
+
+    // This endpoint is mainly for logging/tracking purposes
+    // The playlist is already created in the user's Spotify account
+    // We could extend this to save to a database if needed
+
+    console.log('Playlist saved:', {
+      playlistId,
+      name,
+      description,
+      timestamp: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true, message: 'Playlist saved successfully' });
+  } catch (error) {
+    console.error('Error saving playlist:', error);
+    return NextResponse.json({ error: 'Failed to save playlist' }, { status: 500 });
+  }
 }

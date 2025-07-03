@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { moodToGenres, MoodType } from '../../../../lib/moodToGenres';
 
 interface SpotifyTrack {
   uri: string;
@@ -30,13 +31,7 @@ interface SpotifyAddTracksResponse {
   snapshot_id: string;
 }
 
-const genreMap: Record<string, string[]> = {
-  happy: ['pop', 'dance', 'edm'],
-  sad: ['acoustic', 'piano', 'chill'],
-  energetic: ['work-out', 'rock', 'techno'],
-  chill: ['lo-fi', 'ambient', 'chill'],
-  romantic: ['romance', 'rnb', 'soul'],
-};
+const genreMap = moodToGenres;
 
 export async function POST(req: NextRequest) {
   const body: CreatePlaylistRequest = await req.json();
@@ -44,7 +39,7 @@ export async function POST(req: NextRequest) {
   const mood = moodRaw?.toLowerCase();
   console.log('📩 Received mood:', mood);
 
-  if (!mood || !genreMap[mood]) {
+  if (!mood || !(mood in genreMap)) {
     console.error('❌ Invalid mood:', mood);
     return NextResponse.json({ error: 'Invalid mood: ' + mood }, { status: 400 });
   }
@@ -68,7 +63,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 2. Recommendations
-  const seedGenres = genreMap[mood];
+  const seedGenres = genreMap[mood as keyof typeof genreMap];
   const recRes = await fetch(
     `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${seedGenres.join(',')}`,
     { headers: { Authorization: `Bearer ${access_token}` } }

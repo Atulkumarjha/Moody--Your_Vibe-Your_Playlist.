@@ -7,5 +7,5 @@ export async function GET() {
     cookieStore.delete('access_token');
     cookieStore.delete('refresh_token');
 
-    return NextResponse.redirect('/');
+    return NextResponse.redirect(new URL('/', process.env.NEXTAUTH_URL || 'http://localhost:3000'));
 }
