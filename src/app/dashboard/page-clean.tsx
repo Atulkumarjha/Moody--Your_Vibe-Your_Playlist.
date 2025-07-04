@@ -139,7 +139,7 @@ export default function Dashboard() {
               {user?.images?.[0]?.url && (
                 <Image
                   src={user.images[0].url}
-                  alt="Profile"
+                  alt=""
                   width={96}
                   height={96}
                   className="rounded-full border-4 border-white/20"

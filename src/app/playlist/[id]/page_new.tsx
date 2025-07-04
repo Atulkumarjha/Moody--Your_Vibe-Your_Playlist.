@@ -165,7 +165,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
             {playlist.images?.[0] && (
               <Image
                 src={playlist.images[0].url}
-                alt={playlist.name}
+                alt=""
                 width={200}
                 height={200}
                 className="rounded-lg shadow-lg"
@@ -225,7 +225,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
                 {item.track.album.images?.[0] && (
                   <Image
                     src={item.track.album.images[0].url}
-                    alt={item.track.album.name}
+                    alt=""
                     width={48}
                     height={48}
                     className="rounded"

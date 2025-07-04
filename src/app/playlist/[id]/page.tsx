@@ -215,7 +215,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                   {playlist.images?.[0] ? (
                     <Image
                       src={playlist.images[0].url}
-                      alt={playlist.name}
+                      alt=""
                       width={240}
                       height={240}
                       className="rounded-2xl shadow-2xl border-4 border-white/20"
@@ -334,7 +334,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                         {item.track.album.images?.[0] ? (
                           <Image
                             src={item.track.album.images[0].url}
-                            alt={item.track.album.name}
+                            alt=""
                             width={60}
                             height={60}
                             className="rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 border-2 border-white/10 group-hover:border-white/20"

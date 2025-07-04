@@ -166,7 +166,7 @@ export default function Dashboard() {
                   <div className="relative">
                     <Image
                       src={user.images[0].url}
-                      alt="Profile"
+                      alt=""
                       width={120}
                       height={120}
                       className="rounded-full border-4 border-white/30 shadow-lg"
