@@ -1,33 +1,37 @@
-# Deployment Guide
+# 🚀 Deployment Guide
 
-## Environment Variables Required
+## Quick Deploy to Vercel
 
-Make sure your `.env.local` has these variables:
-```bash
-SPOTIFY_CLIENT_ID=1ed4574fefe145d7a4b4a325c20bf432
-SPOTIFY_CLIENT_SECRET=aaf9d63af7e84cc7932f502a1f0fa583
-SPOTIFY_REDIRECT_URI=https://moody-your-vibe-your-playlist.vercel.app/api/auth/callback
-NEXTAUTH_URL=https://moody-your-vibe-your-playlist.vercel.app
-NEXTAUTH_SECRET=PLKbAFOvMPOnn4tL3TcsX/Hubibe2SsQBh2rIn6Wr5w=
-MONGODB_URI=mongodb+srv://atul:12345@moody.nz4fpar.mongodb.net/?retryWrites=true&w=majority&appName=MOODY
-```
-
-## Deploy to Vercel
-
-### Option 1: Git Push (Recommended)
+### 1. Push to GitHub
 ```bash
 git add .
-git commit -m "Update"
+git commit -m "Deploy to production"
 git push origin main
 ```
 
-### Option 2: Vercel CLI
-```bash
-npm i -g vercel
-vercel --prod
+### 2. Environment Variables
+Set these in your Vercel dashboard (Settings → Environment Variables):
+
+```env
+SPOTIFY_CLIENT_ID=1ed4574fefe145d7a4b4a325c20bf432
+SPOTIFY_CLIENT_SECRET=aaf9d63af7e84cc7932f502a1f0fa583
+SPOTIFY_REDIRECT_URI=https://your-app.vercel.app/api/auth/callback
+NEXTAUTH_URL=https://your-app.vercel.app
+NEXTAUTH_SECRET=your-secure-secret-here
+MONGODB_URI=mongodb+srv://your-connection-string
 ```
 
-## Important Notes
-- ✅ App uses reliable search-based playlist generation
-- ✅ All environment variables must be set in Vercel dashboard
-- ✅ Remember to redeploy after changing environment variables
+### 3. Spotify App Configuration
+In your [Spotify Developer Dashboard](https://developer.spotify.com/dashboard):
+- Add your production URL to Redirect URIs
+- Example: `https://your-app.vercel.app/api/auth/callback`
+
+### 4. Deploy
+Vercel will automatically deploy when you push to GitHub.
+
+## 🎯 Key Features
+- ✅ Search-based playlist generation (more reliable)
+- ✅ Clean, modern UI with smooth animations
+- ✅ Responsive design for all devices
+- ✅ Secure authentication with Spotify
+- ✅ Fast playlist creation and navigation

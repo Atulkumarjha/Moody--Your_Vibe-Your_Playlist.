@@ -90,13 +90,11 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         }
 
         const playlistData = await playlistRes.json();
-        console.log('📋 Playlist data received:', {
-          id: playlistData.id,
-          name: playlistData.name,
-          totalTracks: playlistData.tracks?.total || 0,
-          actualTrackItems: playlistData.tracks?.items?.length || 0,
-          firstTrack: playlistData.tracks?.items?.[0]?.track?.name || 'None'
-        });
+        
+        if (!playlistData.tracks || !playlistData.tracks.items) {
+          throw new Error('Invalid playlist data received');
+        }
+        
         setPlaylist(playlistData);
       } catch (err) {
         console.error('Error fetching playlist:', err);
