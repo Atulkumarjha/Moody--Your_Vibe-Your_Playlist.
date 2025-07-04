@@ -46,8 +46,15 @@ export async function POST(req: NextRequest) {
 
     const searchData = await searchRes.json();
     const tracks = searchData.tracks.items;
+    
+    console.log('🔍 Search results:', {
+      query,
+      totalTracks: tracks?.length || 0,
+      firstTrack: tracks?.[0]?.name || 'None'
+    });
 
     if (!tracks || tracks.length === 0) {
+      console.log('❌ No tracks found for query:', query);
       return NextResponse.json({ error: 'No tracks found' }, { status: 500 });
     }
 
@@ -75,6 +82,13 @@ export async function POST(req: NextRequest) {
 
     // Add tracks
     const trackURIs = tracks.map((track: { uri: string }) => track.uri);
+    
+    console.log('🎵 Adding tracks to playlist:', {
+      playlistId: playlist.id,
+      trackCount: trackURIs.length,
+      firstTrackURI: trackURIs[0] || 'None'
+    });
+    
     const addRes = await fetch(
       `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
       {
@@ -88,8 +102,13 @@ export async function POST(req: NextRequest) {
     );
 
     if (!addRes.ok) {
+      const errorData = await addRes.json();
+      console.error('❌ Failed to add tracks:', errorData);
       return NextResponse.json({ error: 'Failed to add tracks' }, { status: 500 });
     }
+
+    const addResult = await addRes.json();
+    console.log('✅ Tracks added successfully:', addResult);
 
     console.log('✅ Simple playlist created:', playlist.id);
     return NextResponse.json({ playlistId: playlist.id });

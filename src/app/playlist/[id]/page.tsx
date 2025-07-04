@@ -90,6 +90,13 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         }
 
         const playlistData = await playlistRes.json();
+        console.log('📋 Playlist data received:', {
+          id: playlistData.id,
+          name: playlistData.name,
+          totalTracks: playlistData.tracks?.total || 0,
+          actualTrackItems: playlistData.tracks?.items?.length || 0,
+          firstTrack: playlistData.tracks?.items?.[0]?.track?.name || 'None'
+        });
         setPlaylist(playlistData);
       } catch (err) {
         console.error('Error fetching playlist:', err);
@@ -222,46 +229,55 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
           className="bg-white/10 rounded-lg p-6 backdrop-blur-sm"
         >
           <h2 className="text-2xl font-bold mb-4">Tracks</h2>
-          <div className="space-y-3">
-            {playlist.tracks.items.map((item, index) => (
-              <motion.div
-                key={item.track.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <div className="text-gray-400 w-8 text-center">
-                  {index + 1}
-                </div>
-                {item.track.album.images?.[0] && (
-                  <Image
-                    src={item.track.album.images[0].url}
-                    alt={item.track.album.name}
-                    width={48}
-                    height={48}
-                    className="rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h3 className="font-semibold">{item.track.name}</h3>
-                  <p className="text-gray-400 text-sm">
-                    {item.track.artists.map(artist => artist.name).join(', ')} • {item.track.album.name}
-                  </p>
-                </div>
-                <a
-                  href={item.track.external_urls.spotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-400 hover:text-green-300 transition-colors"
+          {!playlist.tracks.items || playlist.tracks.items.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400 mb-4">No tracks found in this playlist</p>
+              <p className="text-sm text-gray-500">
+                This might be due to a sync delay. Try refreshing the page or check the playlist in Spotify.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {playlist.tracks.items.map((item, index) => (
+                <motion.div
+                  key={item.track.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 12l-2-2m0 0l2-2m-2 2h8m-8 0H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2h-2" />
-                  </svg>
-                </a>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="text-gray-400 w-8 text-center">
+                    {index + 1}
+                  </div>
+                  {item.track.album.images?.[0] && (
+                    <Image
+                      src={item.track.album.images[0].url}
+                      alt={item.track.album.name}
+                      width={48}
+                      height={48}
+                      className="rounded"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{item.track.name}</h3>
+                    <p className="text-gray-400 text-sm">
+                      {item.track.artists.map(artist => artist.name).join(', ')} • {item.track.album.name}
+                    </p>
+                  </div>
+                  <a
+                    href={item.track.external_urls.spotify}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-400 hover:text-green-300 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 12l-2-2m0 0l2-2m-2 2h8m-8 0H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2h-2" />
+                    </svg>
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
