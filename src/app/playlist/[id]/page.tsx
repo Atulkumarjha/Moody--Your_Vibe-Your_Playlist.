@@ -86,16 +86,41 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         );
 
         if (!playlistRes.ok) {
-          throw new Error('Failed to fetch playlist');
+          const errorText = await playlistRes.text();
+          console.error('Playlist fetch error:', playlistRes.status, errorText);
+          throw new Error(`Failed to fetch playlist: ${playlistRes.status} ${errorText}`);
         }
 
         const playlistData = await playlistRes.json();
         
-        if (!playlistData.tracks || !playlistData.tracks.items) {
-          throw new Error('Invalid playlist data received');
+        // Handle cases where playlist might not have tracks yet (newly created)
+        if (!playlistData.tracks) {
+          // If tracks field is missing, try to get it with a simpler request
+          const simpleRes = await fetch(
+            `https://api.spotify.com/v1/playlists/${playlistId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            }
+          );
+          
+          if (simpleRes.ok) {
+            const simpleData = await simpleRes.json();
+            setPlaylist({
+              ...simpleData,
+              tracks: simpleData.tracks || { total: 0, items: [] }
+            });
+          } else {
+            throw new Error('Failed to fetch playlist details');
+          }
+        } else {
+          // Ensure tracks.items exists even if empty
+          if (!playlistData.tracks.items) {
+            playlistData.tracks.items = [];
+          }
+          setPlaylist(playlistData);
         }
-        
-        setPlaylist(playlistData);
       } catch (err) {
         console.error('Error fetching playlist:', err);
         setError(err instanceof Error ? err.message : 'Failed to load playlist');

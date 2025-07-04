@@ -79,9 +79,11 @@ export async function POST(req: NextRequest) {
     }
 
     const playlist = await playlistRes.json();
+    console.log('Created playlist:', playlist.id, playlist.name);
 
     // Add tracks to playlist
     const trackURIs = tracks.map((track: { uri: string }) => track.uri);
+    console.log('Adding tracks to playlist:', trackURIs.length, 'tracks');
     
     const addRes = await fetch(
       `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
@@ -96,8 +98,12 @@ export async function POST(req: NextRequest) {
     );
 
     if (!addRes.ok) {
+      console.error('Failed to add tracks, status:', addRes.status, await addRes.text());
       return NextResponse.json({ error: 'Failed to add tracks to playlist' }, { status: 500 });
     }
+
+    const addResult = await addRes.json();
+    console.log('Added tracks result:', addResult);
 
     return NextResponse.json({ 
       playlistId: playlist.id,

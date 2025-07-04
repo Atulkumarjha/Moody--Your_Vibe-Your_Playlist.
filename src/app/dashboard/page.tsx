@@ -71,21 +71,26 @@ export default function Dashboard() {
       });
 
       const data = await response.json();
+      console.log('Create playlist response:', response.status, data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create playlist');
+        throw new Error(data.error || `API Error: ${response.status}`);
       }
 
       if (!data.playlistId) {
-        throw new Error('No playlist ID returned');
+        throw new Error('No playlist ID returned from API');
       }
 
+      console.log('Navigating to playlist:', data.playlistId);
       // Navigate to the new playlist
       router.push(`/playlist/${data.playlistId}`);
       
     } catch (error) {
       console.error('Playlist generation error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to generate playlist');
+      
+      // Show more detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate playlist';
+      alert(`Error: ${errorMessage}\n\nPlease try again or check your internet connection.`);
     } finally {
       setLoading(false);
     }
