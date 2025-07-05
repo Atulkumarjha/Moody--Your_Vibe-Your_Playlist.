@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import ImageFallback from '../../../../components/ImageFallback';
 
 interface SpotifyPlaylist {
   id: string;
@@ -248,22 +248,18 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
               <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
                 {/* Enhanced Playlist Cover */}
                 <div className="relative group">
-                  {playlist.images?.[0] ? (
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400/40 to-pink-400/40 rounded-3xl blur-2xl scale-110 opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <Image
-                        src={playlist.images[0].url}
-                        alt=""
-                        width={280}
-                        height={280}
-                        className="rounded-3xl shadow-2xl border-4 border-white/30 relative z-10 group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-70 h-70 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl border-4 border-white/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                      <span className="text-8xl">🎵</span>
-                    </div>
-                  )}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/40 to-pink-400/40 rounded-3xl blur-2xl scale-110 opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <ImageFallback
+                      src={playlist.images?.[0]?.url}
+                      alt=""
+                      width={280}
+                      height={280}
+                      className="rounded-3xl shadow-2xl border-4 border-white/30 relative z-10 group-hover:scale-105 transition-transform duration-300"
+                      fallbackIcon="🎵"
+                      fallbackClassName="rounded-3xl shadow-2xl border-4 border-white/30 relative z-10 group-hover:scale-105 transition-transform duration-300 text-8xl"
+                    />
+                  </div>
                   <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500 w-16 h-16 rounded-full border-4 border-white/90 flex items-center justify-center shadow-2xl animate-pulse">
                     <span className="text-white text-2xl">▶</span>
                   </div>
@@ -384,22 +380,18 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                       
                       {/* Enhanced Album Art */}
                       <div className="relative group/image">
-                        {item.track.album.images?.[0] ? (
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-2xl blur-lg scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                            <Image
-                              src={item.track.album.images[0].url}
-                              alt=""
-                              width={72}
-                              height={72}
-                              className="rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border-2 border-white/20 group-hover:border-white/40 relative z-10 group-hover:scale-105"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-18 h-18 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center border-2 border-white/20 group-hover:scale-105 transition-transform duration-300">
-                            <span className="text-2xl">🎵</span>
-                          </div>
-                        )}
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-2xl blur-lg scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                          <ImageFallback
+                            src={item.track.album.images?.[0]?.url}
+                            alt=""
+                            width={72}
+                            height={72}
+                            className="rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border-2 border-white/20 group-hover:border-white/40 relative z-10 group-hover:scale-105"
+                            fallbackIcon="🎵"
+                            fallbackClassName="rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border-2 border-white/20 group-hover:border-white/40 relative z-10 group-hover:scale-105 text-2xl"
+                          />
+                        </div>
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-2xl transition-all duration-300 flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/30 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
                             <span className="text-white text-lg">▶</span>

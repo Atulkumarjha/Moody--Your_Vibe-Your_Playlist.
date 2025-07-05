@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import MoodSelector from '../../../components/MoodSelector';
+import ImageFallback from '../../../components/ImageFallback';
 
 interface SpotifyUser {
   display_name: string;
@@ -181,21 +181,21 @@ export default function Dashboard() {
             
             <div className="text-center relative z-10">
               <div className="flex items-center justify-center mb-10">
-                {user?.images?.[0]?.url && (
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <Image
-                      src={user.images[0].url}
-                      alt=""
-                      width={140}
-                      height={140}
-                      className="rounded-full border-4 border-white/40 shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-green-400 to-emerald-500 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg animate-pulse">
-                      <div className="w-4 h-4 bg-white rounded-full"></div>
-                    </div>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <ImageFallback
+                    src={user?.images?.[0]?.url}
+                    alt=""
+                    width={140}
+                    height={140}
+                    className="rounded-full border-4 border-white/40 shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300"
+                    fallbackIcon="👤"
+                    fallbackClassName="rounded-full border-4 border-white/40 shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300 text-6xl"
+                  />
+                  <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-green-400 to-emerald-500 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg animate-pulse">
+                    <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
-                )}
+                </div>
               </div>
               <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-100 to-white bg-clip-text text-transparent">
                 Welcome back, {user?.display_name}! 👋
