@@ -166,7 +166,7 @@ export default function Dashboard() {
                 Your Vibe, Your Playlist
               </p>
               <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                Transform your emotions into the perfect soundtrack with AI-powered playlist generation
+                Transform your emotions into the perfect soundtrack with Moody playlist generation
               </p>
               <div className="mt-8 flex justify-center space-x-3">
                 <div className="w-4 h-4 bg-purple-400 rounded-full animate-pulse shadow-lg shadow-purple-400/50"></div>
@@ -219,7 +219,7 @@ export default function Dashboard() {
                 Choose Your Mood
               </h3>
               <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                Select the vibe that matches your current energy and let our AI curate the perfect playlist just for you
+                Select the vibe that matches your current energy and let us craft the perfect playlist just for you
               </p>
             </div>
             
@@ -270,12 +270,12 @@ export default function Dashboard() {
                   <div className="w-px h-6 bg-white/20"></div>
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-400/50"></div>
-                    <span className="text-sm text-blue-400 font-medium">AI-Powered</span>
+                    <span className="text-sm text-blue-400 font-medium">Vibe-Powered</span>
                   </div>
                 </div>
                 
                 <p className="text-gray-400 mb-6 text-lg">
-                  ✨ Powered by Spotify API • Built with Next.js & Tailwind CSS • Enhanced with AI
+                  ✨Built with Love & Enhance with Work 
                 </p>
                 
                 <div className="flex justify-center space-x-4">
