@@ -216,93 +216,110 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
-      {/* Background Pattern */}
+      {/* Enhanced Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.2) 2px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.3) 2px, transparent 0)`,
           backgroundSize: '50px 50px'
         }}></div>
       </div>
 
+      {/* Animated Background Orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute top-3/4 right-1/4 w-80 h-80 bg-pink-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-blue-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+      </div>
+
       <div className="relative z-10 p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header Section */}
+        <div className="max-w-7xl mx-auto">
+          {/* Enhanced Header Section */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
+            transition={{ duration: 0.8 }}
+            className="mb-12"
           >
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex flex-col lg:flex-row items-center gap-8">
-                {/* Playlist Cover */}
-                <div className="relative">
+            <div className="bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-3xl p-12 border border-white/20 shadow-2xl relative overflow-hidden">
+              {/* Decorative Elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full -translate-y-20 translate-x-20 filter blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-400/20 to-purple-400/20 rounded-full translate-y-16 -translate-x-16 filter blur-3xl"></div>
+              
+              <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
+                {/* Enhanced Playlist Cover */}
+                <div className="relative group">
                   {playlist.images?.[0] ? (
-                    <Image
-                      src={playlist.images[0].url}
-                      alt=""
-                      width={240}
-                      height={240}
-                      className="rounded-2xl shadow-2xl border-4 border-white/20"
-                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400/40 to-pink-400/40 rounded-3xl blur-2xl scale-110 opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Image
+                        src={playlist.images[0].url}
+                        alt=""
+                        width={280}
+                        height={280}
+                        className="rounded-3xl shadow-2xl border-4 border-white/30 relative z-10 group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-60 h-60 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-2xl border-4 border-white/20 flex items-center justify-center">
-                      <span className="text-6xl">🎵</span>
+                    <div className="w-70 h-70 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl border-4 border-white/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                      <span className="text-8xl">🎵</span>
                     </div>
                   )}
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg">
-                    <span className="text-white text-xl">▶</span>
+                  <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500 w-16 h-16 rounded-full border-4 border-white/90 flex items-center justify-center shadow-2xl animate-pulse">
+                    <span className="text-white text-2xl">▶</span>
                   </div>
                 </div>
                 
-                {/* Playlist Info */}
+                {/* Enhanced Playlist Info */}
                 <div className="flex-1 text-center lg:text-left">
-                  <p className="text-sm font-semibold text-purple-300 mb-2 uppercase tracking-wide">
-                    Playlist
+                  <p className="text-sm font-bold text-purple-300 mb-3 uppercase tracking-wider">
+                    🎵 Playlist
                   </p>
-                  <h1 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                  <h1 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-100 to-pink-100 bg-clip-text text-transparent drop-shadow-2xl">
                     {playlist.name}
                   </h1>
-                  <p className="text-xl text-gray-300 mb-6 max-w-2xl">
+                  <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl leading-relaxed">
                     {playlist.description}
                   </p>
-                  <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4 mb-6">
-                    <span className="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
-                      🎵 {playlist.tracks.total} tracks
-                    </span>
-                    <span className="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
-                      ⏱️ ~{Math.round(playlist.tracks.total * 3.5)} min
-                    </span>
+                  <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 mb-8">
+                    <div className="bg-gradient-to-r from-white/20 to-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 shadow-lg">
+                      <span className="text-lg font-bold">🎵 {playlist.tracks.total} tracks</span>
+                    </div>
+                    <div className="bg-gradient-to-r from-white/20 to-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 shadow-lg">
+                      <span className="text-lg font-bold">⏱️ ~{Math.round(playlist.tracks.total * 3.5)} min</span>
+                    </div>
                   </div>
                   
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                     <a
                       href={playlist.external_urls.spotify}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group bg-green-500 hover:bg-green-600 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-green-500/25 flex items-center gap-3"
+                      className="group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-10 py-5 rounded-3xl font-bold text-lg transition-all duration-300 shadow-2xl hover:shadow-green-500/50 flex items-center gap-4 relative overflow-hidden"
                     >
-                      <span className="text-xl">🎧</span>
-                      <span className="group-hover:scale-105 inline-block transition-transform">
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/30 to-green-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                      <span className="text-2xl relative z-10">🎧</span>
+                      <span className="group-hover:scale-105 inline-block transition-transform relative z-10">
                         Open in Spotify
                       </span>
                     </a>
                     <button
                       onClick={savePlaylist}
-                      className="group bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500/30 hover:border-blue-500/50 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm flex items-center gap-3"
+                      className="group bg-gradient-to-r from-blue-500/20 via-blue-400/20 to-blue-500/20 hover:from-blue-500/30 hover:via-blue-400/30 hover:to-blue-500/30 border-2 border-blue-500/30 hover:border-blue-400/50 px-10 py-5 rounded-3xl font-bold text-lg transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-blue-500/25 flex items-center gap-4 relative overflow-hidden"
                     >
-                      <span className="text-xl">💾</span>
-                      <span className="group-hover:scale-105 inline-block transition-transform">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/20 to-blue-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                      <span className="text-2xl relative z-10">💾</span>
+                      <span className="group-hover:scale-105 inline-block transition-transform relative z-10">
                         Save Playlist
                       </span>
                     </button>
                     <button
                       onClick={() => router.push('/dashboard')}
-                      className="group bg-purple-500/20 hover:bg-purple-500/30 border-2 border-purple-500/30 hover:border-purple-500/50 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm flex items-center gap-3"
+                      className="group bg-gradient-to-r from-purple-500/20 via-purple-400/20 to-purple-500/20 hover:from-purple-500/30 hover:via-purple-400/30 hover:to-purple-500/30 border-2 border-purple-500/30 hover:border-purple-400/50 px-10 py-5 rounded-3xl font-bold text-lg transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-purple-500/25 flex items-center gap-4 relative overflow-hidden"
                     >
-                      <span className="text-xl">🔄</span>
-                      <span className="group-hover:scale-105 inline-block transition-transform">
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/20 to-purple-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                      <span className="text-2xl relative z-10">🔄</span>
+                      <span className="group-hover:scale-105 inline-block transition-transform relative z-10">
                         Create Another
                       </span>
                     </button>
@@ -312,16 +329,24 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
             </div>
           </motion.div>
 
-          {/* Tracks Section */}
+          {/* Enhanced Tracks Section */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-xl"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="bg-gradient-to-b from-white/5 via-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl relative overflow-hidden"
           >
-            <div className="flex items-center gap-3 mb-8">
-              <span className="text-3xl">🎵</span>
-              <h2 className="text-3xl font-bold">Tracks</h2>
+            {/* Decorative Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-pink-500/5"></div>
+            
+            <div className="flex items-center gap-4 mb-12 relative z-10">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-3xl">🎵</span>
+              </div>
+              <div>
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">Tracks</h2>
+                <p className="text-gray-400 text-lg">Your curated music collection</p>
+              </div>
             </div>
             
             {!playlist.tracks.items || playlist.tracks.items.length === 0 ? (
@@ -339,50 +364,56 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4 relative z-10">
                 {playlist.tracks.items.map((item, index) => (
                   <motion.div
                     key={item.track.id}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
-                    className="group bg-white/5 hover:bg-white/10 rounded-2xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 border border-white/5 hover:border-white/20"
+                    transition={{ duration: 0.4, delay: index * 0.03 }}
+                    className="group bg-gradient-to-r from-white/5 via-white/10 to-white/5 hover:from-white/15 hover:via-white/20 hover:to-white/15 rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 border border-white/10 hover:border-white/30 relative overflow-hidden"
                   >
-                    <div className="flex items-center gap-5">
-                      {/* Track Number */}
-                      <div className="text-gray-400 font-mono text-base w-8 text-center group-hover:text-white transition-colors">
+                    {/* Hover Background Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <div className="flex items-center gap-6 relative z-10">
+                      {/* Enhanced Track Number */}
+                      <div className="text-gray-400 font-mono text-lg w-10 text-center group-hover:text-purple-300 transition-colors duration-300 font-bold">
                         {index + 1}
                       </div>
                       
-                      {/* Album Art */}
+                      {/* Enhanced Album Art */}
                       <div className="relative group/image">
                         {item.track.album.images?.[0] ? (
-                          <Image
-                            src={item.track.album.images[0].url}
-                            alt=""
-                            width={60}
-                            height={60}
-                            className="rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 border-2 border-white/10 group-hover:border-white/20"
-                          />
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-2xl blur-lg scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                            <Image
+                              src={item.track.album.images[0].url}
+                              alt=""
+                              width={72}
+                              height={72}
+                              className="rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border-2 border-white/20 group-hover:border-white/40 relative z-10 group-hover:scale-105"
+                            />
+                          </div>
                         ) : (
-                          <div className="w-15 h-15 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-lg flex items-center justify-center border-2 border-white/10">
-                            <span className="text-xl">🎵</span>
+                          <div className="w-18 h-18 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center border-2 border-white/20 group-hover:scale-105 transition-transform duration-300">
+                            <span className="text-2xl">🎵</span>
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-all duration-300 flex items-center justify-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-full w-6 h-6 flex items-center justify-center">
-                            <span className="text-white text-xs">▶</span>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-2xl transition-all duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/30 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
+                            <span className="text-white text-lg">▶</span>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Track Info */}
+                      {/* Enhanced Track Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg text-white group-hover:text-purple-200 transition-colors duration-300 truncate mb-1">
+                        <h3 className="font-bold text-xl text-white group-hover:text-purple-200 transition-colors duration-300 truncate mb-2">
                           {item.track.name}
                         </h3>
-                        <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 truncate text-sm">
-                          <span className="font-medium">
+                        <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 truncate text-base mb-1">
+                          <span className="font-semibold">
                             {item.track.artists.map(artist => artist.name).join(', ')}
                           </span>
                           <span className="mx-2 text-gray-500">•</span>
@@ -390,22 +421,28 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                             {item.track.album.name}
                           </span>
                         </p>
-                        {/* Duration estimate */}
-                        <p className="text-xs text-gray-500 mt-1">
-                          ⏱️ ~3:30
-                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <span>⏱️</span>
+                            <span>~3:30</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span>🎧</span>
+                            <span>High Quality</span>
+                          </span>
+                        </div>
                       </div>
                       
-                      {/* External Link */}
+                      {/* Enhanced External Link */}
                       <a
                         href={item.track.external_urls.spotify}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group/link bg-green-500/20 hover:bg-green-500/30 p-3 rounded-xl transition-all duration-300 hover:scale-110"
+                        className="group/link bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 p-4 rounded-2xl transition-all duration-300 hover:scale-110 border border-green-500/20 hover:border-green-400/40 shadow-lg hover:shadow-green-500/25"
                         title="Open in Spotify"
                       >
                         <svg 
-                          className="w-5 h-5 text-green-400 group-hover/link:text-green-300 transition-colors" 
+                          className="w-6 h-6 text-green-400 group-hover/link:text-green-300 transition-colors" 
                           fill="currentColor" 
                           viewBox="0 0 24 24"
                         >
