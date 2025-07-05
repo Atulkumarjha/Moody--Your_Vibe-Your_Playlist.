@@ -132,6 +132,11 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
     getTokenAndPlaylist();
   }, [playlistId, router]);
 
+  // Handle page refresh
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   const savePlaylist = async () => {
     if (!playlist || !accessToken) return;
 
@@ -310,11 +315,21 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                       </span>
                     </button>
                     <button
+                      onClick={handleRefresh}
+                      className="group bg-gradient-to-r from-orange-500/20 via-orange-400/20 to-orange-500/20 hover:from-orange-500/30 hover:via-orange-400/30 hover:to-orange-500/30 border-2 border-orange-500/30 hover:border-orange-400/50 px-10 py-5 rounded-3xl font-bold text-lg transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-orange-500/25 flex items-center gap-4 relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-400/20 to-orange-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                      <span className="text-2xl relative z-10">🔄</span>
+                      <span className="group-hover:scale-105 inline-block transition-transform relative z-10">
+                        Refresh Page
+                      </span>
+                    </button>
+                    <button
                       onClick={() => router.push('/dashboard')}
                       className="group bg-gradient-to-r from-purple-500/20 via-purple-400/20 to-purple-500/20 hover:from-purple-500/30 hover:via-purple-400/30 hover:to-purple-500/30 border-2 border-purple-500/30 hover:border-purple-400/50 px-10 py-5 rounded-3xl font-bold text-lg transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-purple-500/25 flex items-center gap-4 relative overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/20 to-purple-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
-                      <span className="text-2xl relative z-10">🔄</span>
+                      <span className="text-2xl relative z-10">🎵</span>
                       <span className="group-hover:scale-105 inline-block transition-transform relative z-10">
                         Create Another
                       </span>

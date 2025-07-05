@@ -109,13 +109,40 @@ export default function Dashboard() {
   const handleProfilePicUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (PNG, JPG, GIF, etc.)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Please select an image smaller than 5MB');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setCustomProfilePic(result);
         // Save to localStorage for persistence
         localStorage.setItem('customProfilePic', result);
+        
+        // Show success feedback
+        const successMessage = document.createElement('div');
+        successMessage.textContent = '✅ Profile picture updated successfully!';
+        successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        document.body.appendChild(successMessage);
+        
+        setTimeout(() => {
+          document.body.removeChild(successMessage);
+        }, 3000);
       };
+      
+      reader.onerror = () => {
+        alert('Failed to read the image file. Please try again.');
+      };
+      
       reader.readAsDataURL(file);
     }
   };
@@ -240,7 +267,7 @@ export default function Dashboard() {
                     fallbackClassName="rounded-full border-4 border-white/40 shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300 text-6xl"
                   />
                   
-                  {/* Edit Profile Picture Button */}
+                  {/* Enhanced Edit Profile Picture Button */}
                   <input
                     type="file"
                     accept="image/*"
@@ -250,18 +277,54 @@ export default function Dashboard() {
                   />
                   <label
                     htmlFor="profile-pic-upload"
-                    className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 w-10 h-10 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg cursor-pointer transition-all duration-300 hover:scale-110"
+                    className="absolute -bottom-1 -right-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-xl cursor-pointer transition-all duration-300 hover:scale-110 group-hover:shadow-2xl"
+                    title="Change Profile Picture"
                   >
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </label>
+                  
+                  {/* Reset Profile Picture Button (only show if custom pic exists) */}
+                  {customProfilePic && (
+                    <button
+                      onClick={() => {
+                        setCustomProfilePic(null);
+                        localStorage.removeItem('customProfilePic');
+                      }}
+                      className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 w-8 h-8 rounded-full border-3 border-white/90 flex items-center justify-center shadow-lg cursor-pointer transition-all duration-300 hover:scale-110"
+                      title="Reset to Spotify Profile Picture"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                   
                   <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-green-400 to-emerald-500 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg animate-pulse">
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
                 </div>
               </div>
+              
+              {/* Profile Picture Instructions */}
+              {!customProfilePic && (
+                <div className="text-center mb-6">
+                  <p className="text-sm text-gray-400 max-w-md mx-auto">
+                    📸 Click the camera icon to upload your own profile picture from your device
+                  </p>
+                </div>
+              )}
+              
+              {customProfilePic && (
+                <div className="text-center mb-6">
+                  <p className="text-sm text-green-400 max-w-md mx-auto flex items-center justify-center gap-2">
+                    <span>✅</span>
+                    <span>Custom profile picture uploaded! Click the ❌ to reset to Spotify picture</span>
+                  </p>
+                </div>
+              )}
               <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-100 to-white bg-clip-text text-transparent">
                 Welcome back, {user?.display_name}! 👋
               </h2>
