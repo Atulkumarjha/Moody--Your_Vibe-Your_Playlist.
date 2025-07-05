@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [customProfilePic, setCustomProfilePic] = useState<string | null>(null);
   const router = useRouter();
 
   // Initialize user authentication and profile
@@ -104,6 +105,39 @@ export default function Dashboard() {
     window.location.href = '/api/auth/logout';
   };
 
+  // Handle profile picture upload
+  const handleProfilePicUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setCustomProfilePic(result);
+        // Save to localStorage for persistence
+        localStorage.setItem('customProfilePic', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle page refresh
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  // Handle back navigation
+  const handleBack = () => {
+    router.back();
+  };
+
+  // Load custom profile pic from localStorage on mount
+  useEffect(() => {
+    const savedProfilePic = localStorage.getItem('customProfilePic');
+    if (savedProfilePic) {
+      setCustomProfilePic(savedProfilePic);
+    }
+  }, []);
+
   // Show loading state
   if (!user && !error) {
     return (
@@ -139,6 +173,16 @@ export default function Dashboard() {
   // Main dashboard UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
+      {/* Back Button */}
+      <button
+        onClick={handleBack}
+        className="absolute top-6 left-6 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg rounded-full p-3 border border-white/20 transition-all duration-300 hover:scale-110 shadow-lg"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
       {/* Enhanced Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -187,7 +231,7 @@ export default function Dashboard() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <ImageFallback
-                    src={user?.images?.[0]?.url}
+                    src={customProfilePic || user?.images?.[0]?.url}
                     alt=""
                     width={140}
                     height={140}
@@ -195,6 +239,24 @@ export default function Dashboard() {
                     fallbackIcon="👤"
                     fallbackClassName="rounded-full border-4 border-white/40 shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300 text-6xl"
                   />
+                  
+                  {/* Edit Profile Picture Button */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePicUpload}
+                    className="hidden"
+                    id="profile-pic-upload"
+                  />
+                  <label
+                    htmlFor="profile-pic-upload"
+                    className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 w-10 h-10 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg cursor-pointer transition-all duration-300 hover:scale-110"
+                  >
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </label>
+                  
                   <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-green-400 to-emerald-500 w-12 h-12 rounded-full border-4 border-white/90 flex items-center justify-center shadow-lg animate-pulse">
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
@@ -251,6 +313,21 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
+              </div>
+            )}
+            
+            {/* Refresh Button */}
+            {!loading && (
+              <div className="mt-12 text-center">
+                <button
+                  onClick={handleRefresh}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 mx-auto"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Refresh Page</span>
+                </button>
               </div>
             )}
           </div>
