@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 export interface MoodSelectorProps {
   onSelect: (mood: string) => void;
   loading: boolean;
+  selectedMood?: string;
   disabled?: boolean;
 }
 
@@ -51,25 +52,32 @@ const moods = [
   },
 ];
 
-export default function MoodSelector({ onSelect, loading, disabled }: MoodSelectorProps) {
+export default function MoodSelector({ onSelect, loading, selectedMood, disabled }: MoodSelectorProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-      {moods.map((mood, index) => (
-        <motion.button
-          key={mood.name}
-          initial={{ opacity: 0, y: 40, scale: 0.8 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: index * 0.1, type: "spring", stiffness: 200 }}
-          whileHover={{ scale: 1.08, y: -8 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => !loading && !disabled && onSelect(mood.name)}
-          disabled={loading || disabled}
-          className={`group relative overflow-hidden rounded-3xl p-8 text-white font-bold transition-all duration-500 transform min-h-[180px] ${
-            loading || disabled
-              ? 'opacity-50 cursor-not-allowed'
-              : `hover:shadow-2xl hover:${mood.shadowColor} cursor-pointer`
-          }`}
-        >
+      {moods.map((mood, index) => {
+        const isSelected = selectedMood === mood.name;
+        const isLoadingThisMood = loading && isSelected;
+        const isDimmed = loading && !isSelected;
+        
+        return (
+          <motion.button
+            key={mood.name}
+            initial={{ opacity: 0, y: 40, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, delay: index * 0.1, type: "spring", stiffness: 200 }}
+            whileHover={{ scale: isDimmed ? 1 : 1.08, y: isDimmed ? 0 : -8 }}
+            whileTap={{ scale: isDimmed ? 1 : 0.95 }}
+            onClick={() => !loading && !disabled && onSelect(mood.name)}
+            disabled={loading || disabled}
+            className={`group relative overflow-hidden rounded-3xl p-8 text-white font-bold transition-all duration-500 transform min-h-[180px] ${
+              isDimmed
+                ? 'opacity-30 cursor-not-allowed scale-95'
+                : disabled
+                ? 'opacity-50 cursor-not-allowed'
+                : `hover:shadow-2xl hover:${mood.shadowColor} cursor-pointer`
+            }`}
+          >
           {/* Enhanced Background Gradient */}
           <div className={`absolute inset-0 bg-gradient-to-br ${mood.color} opacity-85 group-hover:opacity-95 transition-opacity duration-300`} />
           
@@ -106,7 +114,7 @@ export default function MoodSelector({ onSelect, loading, disabled }: MoodSelect
           <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/0 to-white/0 group-hover:from-white/5 group-hover:via-white/10 group-hover:to-white/5 transition-all duration-500" />
           
           {/* Enhanced Loading Overlay */}
-          {loading && (
+          {isLoadingThisMood && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -116,7 +124,8 @@ export default function MoodSelector({ onSelect, loading, disabled }: MoodSelect
             </motion.div>
           )}
         </motion.button>
-      ))}
+        );
+      })}
     </div>
   );
 }

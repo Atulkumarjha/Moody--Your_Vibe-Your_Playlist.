@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const router = useRouter();
 
   // Initialize user authentication and profile
@@ -62,6 +63,7 @@ export default function Dashboard() {
     }
 
     setLoading(true);
+    setSelectedMood(mood);
     
     try {
       const response = await fetch('/api/create-playlist-simple', {
@@ -93,6 +95,7 @@ export default function Dashboard() {
       alert(`Error: ${errorMessage}\n\nPlease try again or check your internet connection.`);
     } finally {
       setLoading(false);
+      setSelectedMood(null);
     }
   };
 
@@ -223,6 +226,7 @@ export default function Dashboard() {
             <MoodSelector
               onSelect={generatePlaylist}
               loading={loading}
+              selectedMood={selectedMood || undefined}
               disabled={!accessToken}
             />
             
